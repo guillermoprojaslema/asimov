@@ -14,7 +14,7 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
-        $this->command->info('Seeding Users');
+        $this->command->info('Seeding Users with fake data for testing purpose');
         $qty_records = 25;
         $faker = Faker::create('es_ES');
 
@@ -27,7 +27,7 @@ class UserTableSeeder extends Seeder
             $user->save();
         }
 
-        $this->command->info('Seeding Users successfully completed');
+        $this->command->info('Seeding Users with fake data for testing purpose, successfully completed');
 
 
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Appointment;
 use App\Http\Requests\AppointmentRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -17,8 +18,9 @@ class ApiAppointmentsController extends Controller
      */
     public function index()
     {
-        $appointments = Appointment::all();
-        return response()->json($appointments, 201);
+        $data['appointments'] = Appointment::all();
+        $data['now'] = Carbon::now();
+        return response()->json($data, 201);
     }
 
     /**
@@ -28,6 +30,7 @@ class ApiAppointmentsController extends Controller
      */
     public function create()
     {
+        return view('appointments.create');
     }
 
     /**
@@ -38,12 +41,18 @@ class ApiAppointmentsController extends Controller
      */
     public function store(Request $request)
     {
-        $appointment = new Appointment();
-        $appointment->start = $request->start;
-        $appointment->user_id = 1;
-        $appointment->save();
+        if ($this->isAvailable($request->start_date) && $this->isbussinesHour($request->start_time)) {
+            $appointment = new Appointment();
+            $appointment->start_date = $request->start_date;
+            $appointment->start_time = $request->start_time;
+            $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
+            $appointment->save();
+            return response()->json($appointment, 201);
+        } else {
+            return response()->json(null, 400);
+        }
 
-        return response()->json($appointment, 201);
+
     }
 
     /**
@@ -55,6 +64,7 @@ class ApiAppointmentsController extends Controller
     public function show($id)
     {
         $data['appointment'] = Appointment::findOrFail($id);
+        $data['user'] = $data['appointment']->user()->email;
         return view('appointments.show', $data);
 
     }
@@ -68,6 +78,7 @@ class ApiAppointmentsController extends Controller
     public function edit($id)
     {
         $data['appointment'] = Appointment::findOrFail($id);
+        $data['user'] = $data['appointment']->user()->email;
         return view('appointments.edit', $data);
     }
 
@@ -80,13 +91,17 @@ class ApiAppointmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // TODO: Checkear si está disponible o no
-
         $appointment = Appointment::findOrFail($id);
-        $appointment->start = $request->start;
-        $appointment->save();
-        return response()->json($appointment, 200);
 
+        if ($this->isAvailable($request->start_date) && $this->isbussinesHour($request->start_time)) {
+            $appointment->start_date = $request->start_date;
+            $appointment->start_time = $request->start_time;
+            $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
+            $appointment->save();
+            return response()->json($appointment, 201);
+        } else {
+            return response()->json(null, 400);
+        }
     }
 
     /**
@@ -100,5 +115,30 @@ class ApiAppointmentsController extends Controller
         $appointment = Appointment::findOrFail($id);
         $appointment->delete();
         return response()->json(null, 204);
+    }
+
+    private function isAvailable($start_datetime)
+    {
+        $start_datetime = Carbon::parse($start_datetime);
+        $appointments = Appointment::all();
+        foreach ($appointments as $appointment) {
+            if ($start_datetime->diffInHours($appointment->start) <= 1) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    private function isbussinesHour($start_time)
+    {
+        $from = Carbon::createFromTime(9, 0, 0);
+        $to = Carbon::createFromTime(18, 0, 0);
+        $start_time = Carbon::parse($start_time);
+        if ($start_time->isWeekday() && $start_time->greaterThanOrEqualTo($from) && $start_time->addHour()->greaterThanOrEqualTo($to)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -15,7 +15,7 @@ class AppointmentTableSeed extends Seeder
      */
     public function run()
     {
-        $this->command->info('Seeding Appointments');
+        $this->command->info('Seeding Appointments with fake data for testing purposes');
         $qty_records_per_day = 10;
         $qty_records_days = 7;
         $faker = Faker::create('es_ES');
@@ -25,7 +25,8 @@ class AppointmentTableSeed extends Seeder
             for ($j = 1 ; $j<= $qty_records_per_day; $j++){
 
                 $appointment = new Appointment();
-                $appointment->start = $datetime->format('Y-m-d H:i:s');
+                $appointment->start_date = $datetime->format('Y-m-d');
+                $appointment->start_time = $datetime->format('H:i:s');
                 $appointment->user_id = $faker->numberBetween(1, 25);
                 $appointment->save();
                 $datetime->addHour();
@@ -34,6 +35,6 @@ class AppointmentTableSeed extends Seeder
             $datetime->subHours(10)->addDay();
         }
 
-        $this->command->info('Seeding Appointments successfully completed');
+        $this->command->info('Seeding Appointments with fake data for testing purposes, successfully completed');
     }
 }
