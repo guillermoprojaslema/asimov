@@ -41,10 +41,9 @@ class ApiAppointmentsController extends Controller
      */
     public function store(Request $request)
     {
-        if ($this->isAvailable($request->start_date) && $this->isbussinesHour($request->start_time)) {
+        if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
             $appointment = new Appointment();
-            $appointment->start_date = $request->start_date;
-            $appointment->start_time = $request->start_time;
+            $appointment->start = $request->start;
             $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
             $appointment->save();
             return response()->json($appointment, 201);
@@ -64,7 +63,7 @@ class ApiAppointmentsController extends Controller
     public function show($id)
     {
         $data['appointment'] = Appointment::findOrFail($id);
-        $data['user'] = $data['appointment']->user()->email;
+        $data['user'] = $data['appointment']->user()->first();
         return view('appointments.show', $data);
 
     }
@@ -93,9 +92,8 @@ class ApiAppointmentsController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
 
-        if ($this->isAvailable($request->start_date) && $this->isbussinesHour($request->start_time)) {
-            $appointment->start_date = $request->start_date;
-            $appointment->start_time = $request->start_time;
+        if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
+            $appointment->start = $request->start;
             $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
             $appointment->save();
             return response()->json($appointment, 201);
