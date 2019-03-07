@@ -41,9 +41,10 @@ class ApiAppointmentsController extends Controller
      */
     public function store(Request $request)
     {
+
         if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
             $appointment = new Appointment();
-            $appointment->start = $request->start;
+            $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
             $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
             $appointment->save();
             return response()->json($appointment, 201);
@@ -120,7 +121,7 @@ class ApiAppointmentsController extends Controller
         $start_datetime = Carbon::parse($start_datetime);
         $appointments = Appointment::all();
         foreach ($appointments as $appointment) {
-            if ($start_datetime->diffInHours($appointment->start) <= 1) {
+            if ($start_datetime->diffInHours($appointment->start) < 1) {
                 return false;
             }
         }
