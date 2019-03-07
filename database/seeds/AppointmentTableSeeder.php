@@ -6,7 +6,7 @@ use Faker\Factory as Faker;
 use Carbon\Carbon;
 
 
-class AppointmentTableSeed extends Seeder
+class AppointmentTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -25,8 +25,7 @@ class AppointmentTableSeed extends Seeder
             for ($j = 1 ; $j<= $qty_records_per_day; $j++){
 
                 $appointment = new Appointment();
-                $appointment->start_date = $datetime->format('Y-m-d');
-                $appointment->start_time = $datetime->format('H:i:s');
+                $appointment->start = $datetime->format('Y-m-d H:i:s');
                 $appointment->user_id = $faker->numberBetween(1, 25);
                 $appointment->save();
                 $datetime->addHour();
