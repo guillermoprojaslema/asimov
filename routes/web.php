@@ -18,7 +18,7 @@ Route::get('/', function () {
 
 Route::get('appointments', 'AppointmentsController@index')->name('appointments.index');
 Route::post('appointments/create', 'AppointmentsController@create')->name('appointments.create');
-Route::post('appointments/{appointment}', 'AppointmentsController@show')->name('appointments.show');
+Route::get('appointments/{appointment}', 'AppointmentsController@show')->name('appointments.show');
 Route::post('appointments/{appointment}/edit', 'AppointmentsController@edit')->name('appointments.edit');
 
 
