@@ -26,9 +26,9 @@ class AppointmentTableSeeder extends Seeder
 
                 $appointment = new Appointment();
                 $appointment->start = $datetime->format('Y-m-d H:i:s');
+                $appointment->end = $datetime->addHour()->format('Y-m-d H:i:s');
                 $appointment->user_id = $faker->numberBetween(1, 25);
                 $appointment->save();
-                $datetime->addHour();
             }
 
             $datetime->subHours(10)->addDay();

@@ -16,7 +16,29 @@ class AppointmentsController extends Controller
      */
     public function index()
     {
-        $data ['appointments'] = Appointment::all();
+        $appointments = Appointment::all();
+        $events = [];
+        foreach ($appointments as $appointment) {
+            $events[] = \Calendar::event(
+                "Appointment with " . $appointment->user()->first()->name, //event title
+                false, //full day event?
+                $appointment->getStart(), //start time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg)
+                $appointment->getEnd(), //end time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg),
+                $appointment->getId(), //optional event ID
+                [
+                    'url' => url('appointments/' . $appointment->getId()),
+                    //any other full-calendar supported parameters
+                ]
+            );
+        }
+
+        $data['calendar'] = \Calendar::addEvents($events)
+            ->setOptions([ //set fullcalendar options
+                'firstDay' => 1,
+                'themeSystem' => 'bootstrap3'
+            ]);
+
+
         return view('appointments.index', $data);
     }
 

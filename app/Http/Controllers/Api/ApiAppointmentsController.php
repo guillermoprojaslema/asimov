@@ -45,8 +45,14 @@ class ApiAppointmentsController extends Controller
         if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
             $appointment = new Appointment();
             $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
+            $appointment->end = Carbon::parse($request->start)->addHour()->format('Y-m-d H:i:s');
             $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
             $appointment->save();
+
+
+
+
+
             return response()->json($appointment, 201);
         } else {
             return response()->json(null, 400);
@@ -94,7 +100,8 @@ class ApiAppointmentsController extends Controller
         $appointment = Appointment::findOrFail($id);
 
         if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
-            $appointment->start = $request->start;
+            $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
+            $appointment->end = Carbon::parse($request->start)->addHour()->format('Y-m-d H:i:s');
             $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
             $appointment->save();
             return response()->json($appointment, 201);
