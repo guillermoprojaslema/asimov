@@ -19,23 +19,42 @@ class AppointmentsController extends Controller
         $appointments = Appointment::all();
         $events = [];
         foreach ($appointments as $appointment) {
-            $events[] = \Calendar::event(
-                "Appointment with " . $appointment->user()->first()->name, //event title
-                false, //full day event?
-                $appointment->getStart(), //start time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg)
-                $appointment->getEnd(), //end time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg),
-                $appointment->getId(), //optional event ID
-                [
-                    'url' => url('appointments/' . $appointment->getId()),
-                    //any other full-calendar supported parameters
-                ]
-            );
+
+            if ($appointment->user_id) {
+                $events[] = \Calendar::event(
+                    "Appointment with " . $appointment->user()->first()->name, //event title
+                    false, //full day event?
+                    $appointment->getStart(), //start time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg)
+                    $appointment->getEnd(), //end time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg),
+                    $appointment->getId(), //optional event ID
+                    [
+                        'url' => url('appointments/' . $appointment->getId()),
+                        'backgroundColor' => 'red'
+                        //any other full-calendar supported parameters
+                    ]
+                );
+            } else {
+                $events[] = \Calendar::event(
+                    "The Death is availble ", //event title
+                    false, //full day event?
+                    $appointment->getStart(), //start time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg)
+                    $appointment->getEnd(), //end time, must be a DateTime object or valid DateTime format (http://bit.ly/1z7QWbg),
+                    $appointment->getId(), //optional event ID
+                    [
+                        'url' => url('appointments/' . $appointment->getId()),
+                        'backgroundColor' => 'blue'
+                        //any other full-calendar supported parameters
+                    ]
+                );
+            }
+
         }
 
         $data['calendar'] = \Calendar::addEvents($events)
             ->setOptions([ //set fullcalendar options
                 'firstDay' => 1,
-                'themeSystem' => 'bootstrap3'
+                'themeSystem' => 'bootstrap3',
+                'locale' => 'es'
             ]);
 
 
