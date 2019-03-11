@@ -4,10 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Appointment;
 use App\Http\Requests\AppointmentRequest;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use GuzzleHttp\Client;
+use Validator;
+use DB;
+
 
 class ApiAppointmentsController extends Controller
 {
@@ -18,9 +23,13 @@ class ApiAppointmentsController extends Controller
      */
     public function index()
     {
-        $data['appointments'] = Appointment::all();
-        $data['now'] = Carbon::now();
-        return response()->json($data, 201);
+        $appointments = DB::table('appointments')
+            ->leftjoin('users', 'users.id', '=', 'appointments.user_id')
+            ->select('appointments.*', 'users.name', 'users.last_name', 'users.email')
+            ->get();
+
+
+        return response()->json($appointments, 200);
     }
 
     /**
@@ -30,7 +39,6 @@ class ApiAppointmentsController extends Controller
      */
     public function create()
     {
-        return view('appointments.create');
     }
 
     /**
@@ -42,20 +50,45 @@ class ApiAppointmentsController extends Controller
     public function store(Request $request)
     {
 
-        if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
-            $appointment = new Appointment();
-            $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
-            $appointment->end = Carbon::parse($request->start)->addHour()->format('Y-m-d H:i:s');
-            $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
-            $appointment->save();
+        $validator = Validator::make($request->all(), [
+            'start' => 'required|date',
+            'name' => 'required|min:2|max:191',
+            'last_name' => 'required|min:2|max:191',
+            'email' => 'required|email|max:191',
+        ]);
 
-
-
-
-
-            return response()->json($appointment, 201);
-        } else {
+        if ($validator->fails()) {
             return response()->json(null, 400);
+        } else {
+            if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
+
+                $user = User::where('email', $request->email)->first();
+                if (!$user) {
+                    $user = new User();
+                    $user->password = bcrypt('password');
+                    $user->remember_token = bcrypt('password');
+                }
+                $user->name = $request->name;
+                $user->last_name = $request->last_name;
+                $user->email = $request->email;
+                $user->save();
+
+                $appointment = Appointment::where('start', $request->start)->first();
+
+                if ($appointment) {
+                    $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
+                    $appointment->end = Carbon::parse($request->start)->addHour()->format('Y-m-d H:i:s');
+                    $appointment->user_id = $user->id;
+                    $appointment->save();
+                } else {
+                    return response()->json(null, 400);
+                }
+
+                return response()->json($appointment, 201);
+            } else {
+
+                return response()->json(null, 400);
+            }
         }
 
 
@@ -69,10 +102,17 @@ class ApiAppointmentsController extends Controller
      */
     public function show($id)
     {
-        $data['appointment'] = Appointment::findOrFail($id);
-        $data['user'] = $data['appointment']->user()->first();
-        return view('appointments.show', $data);
+        $appointment = DB::table('appointments')
+            ->leftjoin('users', 'users.id', '=', 'appointments.user_id')
+            ->select('appointments.*', 'users.name', 'users.last_name', 'users.email')
+            ->where('appointments.id', $id)
+            ->first();
 
+        if ($appointment) {
+            return response()->json($appointment, 200);
+        } else {
+            return response()->json(null, 404);
+        }
     }
 
     /**
@@ -83,9 +123,21 @@ class ApiAppointmentsController extends Controller
      */
     public function edit($id)
     {
-        $data['appointment'] = Appointment::findOrFail($id);
-        $data['user'] = $data['appointment']->user()->email;
-        return view('appointments.edit', $data);
+
+        $appointment = DB::table('appointments')
+            ->join('users', 'users.id', '=', 'appointments.user_id')
+            ->select('appointments.*', 'users.name', 'users.last_name', 'users.email')
+            ->where('appointments.id', $id)
+            ->first();
+
+
+        if ($appointment) {
+            return response()->json($appointment, 200);
+        } else {
+            return response()->json(null, 404);
+        }
+
+
     }
 
     /**
@@ -97,16 +149,44 @@ class ApiAppointmentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $appointment = Appointment::findOrFail($id);
 
-        if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
-            $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
-            $appointment->end = Carbon::parse($request->start)->addHour()->format('Y-m-d H:i:s');
-            $appointment->user_id = 1; // TODO: Que sea el usuario que esté logueado
-            $appointment->save();
-            return response()->json($appointment, 201);
-        } else {
+        $validator = Validator::make($request->all(), [
+            'start' => 'required|date',
+            'name' => 'required|min:2|max:191',
+            'last_name' => 'required|min:2|max:191',
+            'email' => 'required|email|max:191',
+        ]);
+
+        if ($validator->fails()) {
             return response()->json(null, 400);
+        } else {
+            if ($this->isAvailable($request->start) && $this->isbussinesHour($request->start)) {
+
+                $user = User::where('email', $request->email)->first();
+                if (!$user) {
+                    $user = new User();
+                    $user->password = bcrypt('password');
+                    $user->remember_token = bcrypt('password');
+                }
+                $user->name = $request->name;
+                $user->last_name = $request->last_name;
+                $user->email = $request->email;
+                $user->save();
+
+                $appointment = Appointment::findOrFail($id);
+                if ($appointment) {
+                    $appointment->start = Carbon::parse($request->start)->format('Y-m-d H:i:s');
+                    $appointment->end = Carbon::parse($request->start)->addHour()->format('Y-m-d H:i:s');
+                    $appointment->user_id = $user->id;
+                    $appointment->save();
+                } else {
+                    return response()->json(null, 400);
+                }
+
+                return response()->json($appointment, 201);
+            } else {
+                return response()->json(null, 400);
+            }
         }
     }
 
@@ -126,7 +206,7 @@ class ApiAppointmentsController extends Controller
     private function isAvailable($start_datetime)
     {
         $start_datetime = Carbon::parse($start_datetime);
-        $appointments = Appointment::all();
+        $appointments = Appointment::whereNull('user_id')->where('start', '<>', $start_datetime->format('Y-m-d H:i:s'))->get();
         foreach ($appointments as $appointment) {
             if ($start_datetime->diffInHours($appointment->start) < 1) {
                 return false;
@@ -141,7 +221,8 @@ class ApiAppointmentsController extends Controller
         $from = Carbon::createFromTime(9, 0, 0);
         $to = Carbon::createFromTime(18, 0, 0);
         $start_time = Carbon::parse($start_time);
-        if ($start_time->isWeekday() && $start_time->greaterThanOrEqualTo($from) && $start_time->addHour()->greaterThanOrEqualTo($to)) {
+
+        if ($start_time->isWeekday() && $start_time->lessThanOrEqualTo($from) && $start_time->addHour()->lessThanOrEqualTo($to)) {
             return true;
         } else {
             return false;

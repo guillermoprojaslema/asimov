@@ -14,20 +14,21 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
-        $this->command->info('Seeding Users with fake data for testing purpose');
+        $this->command->info('Seeding Users with fake data for testing purposes');
         $qty_records = 25;
         $faker = Faker::create('es_ES');
 
         for ($i = 1; $i <= $qty_records; $i++) {
             $user = new User();
-            $user->name = $faker->name. ' '. $faker->lastName;
+            $user->name = $faker->name;
+            $user->last_name = $faker->lastName;
             $user->email = $faker->unique()->email;
             $user->password = bcrypt('password');
             $user->remember_token = bcrypt('password');
             $user->save();
         }
 
-        $this->command->info('Seeding Users with fake data for testing purpose, successfully completed');
+        $this->command->info('Seeding Users with fake data for testing purposes, successfully completed');
 
 
     }
