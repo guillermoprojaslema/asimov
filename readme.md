@@ -16,14 +16,18 @@ According to the job ad, submited by [Asimov](https://goo.gl/M9vJX2), I have dev
 - I Have assumed that you have knowledge about databases, php, css, etc
 
 ## Step 1: The web client
-- Open a terminal and clone this repo ```git clone  https://github.com/guillermoprojaslema/asimov.git```
+- Open a terminal and clone this repo ```git clone  https://github.com/guillermoprojaslema/asimov_web.git```
 - ```cd asimov_web```
+- ```composer install```
 - ```php artisan serve```
 ## Step 2: The API project
-- Open a terminal and clone this other repo ```git clone  https://github.com/guillermoprojaslema/asimov_web.git```
+- Open a terminal and clone this other repo ```git clone  https://github.com/guillermoprojaslema/asimov.git```
 - ```cd asimov```
+- ```composer install```
+### 2.1 Create  your database. In this case, I'll use MySql
+- ``` mysql -u root -p``` then type your pasword and then ``` create database asimov; use asimov; ```
 - Then, you'll have to edit your ```.env``` with valid credentials for your environment, such as database name, database driver, password. You can achive that with ```nano .env```
-- One, your .env is ready  execute ```php artisan migrate```
+- One, your ```.env``` is ready, execute ```php artisan migrate```
 - ```php artisan db:seed``` 
 - ```php -S localhost:8080 -t public```
 
