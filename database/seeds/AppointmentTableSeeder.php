@@ -15,11 +15,11 @@ class AppointmentTableSeeder extends Seeder
      */
     public function run()
     {
-        $this->command->info('Seeding Appointments with fake data for testing purposes');
+        $this->command->info('Seeding Appointments with fake data for testing purposes. This may take several minutes');
         $qty_records_per_day = 9;
-        $qty_records_days = 7;
+        $qty_records_days = 365;
         $faker = Faker::create('es_ES');
-        $datetime = Carbon::create(2019, 3, 6, 9, 0, 0, null);
+        $datetime = Carbon::create(2019, 1, 1, 9, 0, 0, null);
 
         for ($i = 1; $i <= $qty_records_days; $i++) {
             for ($j = 1; $j <= $qty_records_per_day; $j++) {
