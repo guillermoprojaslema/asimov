@@ -16,8 +16,8 @@ class AppointmentTableSeeder extends Seeder
     public function run()
     {
         $this->command->info('Seeding Appointments with fake data for testing purposes. This may take several minutes');
-        $qty_records_per_day = 31;
-        $qty_records_days = 365;
+        $qty_records_per_day = 9;
+        $qty_records_days = 31;
         $faker = Faker::create('es_ES');
         $datetime = Carbon::create(2019, 3, 1, 9, 0, 0, null);
 
