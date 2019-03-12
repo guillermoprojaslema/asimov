@@ -155,6 +155,7 @@ class ApiAppointmentsController extends Controller
             'name' => 'required|min:2|max:191',
             'last_name' => 'required|min:2|max:191',
             'email' => 'required|email|max:191',
+            'appointment_id' => $id
         ]);
 
         if ($validator->fails()) {
@@ -198,6 +199,7 @@ class ApiAppointmentsController extends Controller
      */
     public function destroy($id)
     {
+
         $appointment = Appointment::findOrFail($id);
         $appointment->delete();
         return response()->json(null, 204);
