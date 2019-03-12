@@ -22,9 +22,14 @@ According to the job ad, submited by [Asimov](https://goo.gl/M9vJX2), I have dev
 ## Step 2: The API project
 - Open a terminal and clone this other repo ```git clone  https://github.com/guillermoprojaslema/asimov_web.git```
 - ```cd asimov```
+- Then, you'll have to edit your ```.env``` with valid credentials for your environment, such as database name, database driver, password. You can achive that with ```nano .env```
+- One, your .env is ready  execute ```php artisan migrate```
+- ```php artisan db:seed``` 
 - ```php -S localhost:8080 -t public```
 
-## Step 3
+## Step 3: See the web client
 - Open your favourite browser and go to ```http://localhost:8000/appointments```
+
+## Step 4: Hire me!
 
 
